@@ -8,7 +8,7 @@ function Layout() {
         <div>
             <Header />
 
-            <main>
+            <main className='min-h-110'>
                 <Outlet/>
             </main>
 
