@@ -29,12 +29,12 @@ const workSlice = createSlice({
         getFilteredWorks(state, action: PayloadAction<string>) {
             const parts = action.payload.split("-");
 
-            if (parts.length !== 3) return;
+            if (parts.length !== 4) return;
 
-            const [, month, year] = parts;
+            const [, month, year ,] = parts;
 
             const filteredWorks = state.works?.filter(work => {
-                const [, workMonth, workYear] = work.date.split("-");
+                const [, workMonth, workYear ,] = work.date.split("-");
 
                 return workMonth === month && workYear === year;
             });

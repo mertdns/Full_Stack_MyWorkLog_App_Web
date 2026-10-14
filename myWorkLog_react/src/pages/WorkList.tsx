@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState } from "react";
-import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight, FaBullseye } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store/store";
 import type { WorkType } from "../types/Work";
 import { deleteWork } from "../store/workSlice";
 import { IoMdClose } from "react-icons/io";
+import { useConvertDateToText } from "../hooks/useConvertDateToText";
+
+export const months = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
 
 export default function WorkList() {
     const date = new Date();
+    const addWorkModal = useRef<HTMLDivElement>(null);
     const tableContentColumnsStyle: string = "border-1 border-black px-2";
     const [activeMonth, setActiveMonth] = useState<string>((date.getMonth() + 1).toString());
     const [activeYear, setActiveYear] = useState<number>(date.getFullYear());
     const [fullDate, setFullDate] = useState<string>(
-        `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+        `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}-${date.getDay()}`
     );
+    const [textfullDate, setTextFullDate] = useState<string>(useConvertDateToText(fullDate).convert());
     const [addNewWorkModalState, setAddNewWorkModalState] = useState<boolean>(false);
-    const months = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
 
     const works = useSelector((state: RootState) => state.work.works);
     const dispatch: AppDispatch = useDispatch();
@@ -60,20 +64,31 @@ export default function WorkList() {
         }
     ]
 
+    // useEffect(() => {
+    // }, [activeMonth, activeYear])
+
     useEffect(() => {
-    }, [activeMonth, activeYear])
+        const addWorkModalClickFunc = (e: any) => {
+            if (e.target.id === "addWorkModal")
+                setAddNewWorkModalState(false);
+        }
+
+        addWorkModal.current?.addEventListener("click", addWorkModalClickFunc);
+
+        return () => addWorkModal.current?.removeEventListener("click", addWorkModalClickFunc);
+    })
 
     if (addNewWorkModalState) {
         return (
-            <div className="bg-[rgba(0,0,0,.4)] absolute left-0 top-0 bottom-0 right-0 duration-400 flex items-center justify-center">
-                <div className="bg-blue-300 min-w-70 rounded-xl p-2">
-                    <div className="text-right" onClick={() => setAddNewWorkModalState(false)}>
-                        <IoMdClose className="ml-auto text-2xl cursor-pointer" />
+            <div ref={addWorkModal} id="addWorkModal" className="bg-[rgba(0,0,0,.4)] absolute left-0 top-0 bottom-0 right-0 duration-400 flex items-center justify-center">
+                <div className="bg-blue-300 max-w-70 w-full rounded-xl p-2 mx-2">
+                    <div className="text-right">
+                        <IoMdClose onClick={() => setAddNewWorkModalState(false)} className="ml-auto text-2xl cursor-pointer" />
                     </div>
                     <div className="text-center">
                         <h1>EKle</h1>
                         <hr />
-                        <div className="flex items-center gap-x-10 my-4">
+                        <div className="flex items-center justify-center flex-col gap-y-3 sm:flex-row gap-x-10 my-4">
                             <label htmlFor="explanation">Açıklama</label>
                             <input className="outline-0 border-b-1 border-b-yellow-600 placeholder:px-2 placeholder:text-xs text-xs px-2" type="text" name="explanation" placeholder="Opsiyonel Açıklama Gir..." />
                         </div>
@@ -81,6 +96,9 @@ export default function WorkList() {
                             <button className="bg-yellow-700 text-gray-300 font-bold px-4 py-2 rounded-2xl text-xs cursor-pointer duration-200 hover:bg-white hover:text-yellow-700 hover:border-1 hover:border-yellow-700" type="button">
                                 Ekle
                             </button>
+                        </div>
+                        <div>
+                            <span className="text-orange-800">Bugünün Tarihi:</span> <strong>{textfullDate}</strong>
                         </div>
                     </div>
                 </div>
@@ -124,7 +142,7 @@ export default function WorkList() {
 
             <div className="mx-auto my-10 px-2 max-w-160 overflow-x-auto scrollbar-thumb-gray-500">
                 <table className="w-full">
-                    <caption>Günler</caption>
+                    <caption className="select-none">Günler</caption>
                     <thead>
                         <tr>
                             {
@@ -136,19 +154,22 @@ export default function WorkList() {
                     </thead>
                     <tbody>
                         {
-                            works && works.map((work: WorkType) => (
-                                <tr key={work.id}>
-                                    <td className={tableContentColumnsStyle}>{work.id}</td>
-                                    <td className={tableContentColumnsStyle}>{work.date}</td>
-                                    <td className={tableContentColumnsStyle}>{work.explanation}</td>
-                                    <td className={tableContentColumnsStyle + " text-center"}>
-                                        <button
-                                            className="focus:outline-0 border-0 bg-red-700 text-white my-2 px-3 rounded-xl duration-200 hover:bg-transparent hover:text-red-700 hover:border-1 hover:border-red-700"
-                                            onClick={() => deleteWorkBtnClick(work.id)}
-                                            type="button">Sil</button>
-                                    </td>
-                                </tr>
-                            ))
+                            works && works.map((work: WorkType) => {
+                                const data = useConvertDateToText(work.date);
+                                return (
+                                    <tr key={work.id}>
+                                        <td className={tableContentColumnsStyle}>{work.id}</td>
+                                        <td className={tableContentColumnsStyle}>{data.convert()}</td>
+                                        <td className={tableContentColumnsStyle}>{work.explanation}</td>
+                                        <td className={tableContentColumnsStyle + " text-center"}>
+                                            <button
+                                                className="focus:outline-0 border-0 bg-red-700 text-white my-2 px-3 rounded-xl duration-200 hover:bg-transparent hover:text-red-700 hover:border-1 hover:border-red-700"
+                                                onClick={() => deleteWorkBtnClick(work.id)}
+                                                type="button">Sil</button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
                         }
                     </tbody>
                 </table>
