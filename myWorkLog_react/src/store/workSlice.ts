@@ -14,6 +14,9 @@ const workSlice = createSlice({
         addWorks(state: WorkSliceType, action: PayloadAction<WorkType[]>) {
             state.works = action.payload;
         },
+        addSingleWork(state: WorkSliceType, action: PayloadAction<WorkType>){
+            state.works?.push(action.payload);
+        },
         deleteWork(state, action: PayloadAction<number>) {
             const index = state.works?.findIndex(x => x.id === action.payload);
             if (index !== -1 && index != null) {
@@ -45,5 +48,5 @@ const workSlice = createSlice({
     }
 });
 
-export const { addWorks, deleteWork, updateWork, getFilteredWorks } = workSlice.actions;
+export const { addWorks, deleteWork, updateWork, getFilteredWorks, addSingleWork } = workSlice.actions;
 export default workSlice.reducer;
