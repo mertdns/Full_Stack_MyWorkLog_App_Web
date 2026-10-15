@@ -14,7 +14,7 @@ const workSlice = createSlice({
         addWorks(state: WorkSliceType, action: PayloadAction<WorkType[]>) {
             state.works = action.payload;
         },
-        addSingleWork(state: WorkSliceType, action: PayloadAction<WorkType>){
+        addSingleWork(state: WorkSliceType, action: PayloadAction<WorkType>) {
             state.works?.push(action.payload);
         },
         deleteWork(state, action: PayloadAction<number>) {
@@ -34,19 +34,20 @@ const workSlice = createSlice({
 
             if (parts.length !== 4) return;
 
-            const [, month, year ,] = parts;
+            const [, month, year] = parts;
 
-            const filteredWorks = state.works?.filter(work => {
-                const [, workMonth, workYear ,] = work.date.split("-");
+            state.filteredWorks = state.works.filter(work => {
+                const [, workMonth, workYear] = work.date.split("-");
 
-                return workMonth === month && workYear === year;
+                return Number(workMonth) === Number(month)
+                    && Number(workYear) === Number(year);
             });
-
-            if(filteredWorks)
-                state.filteredWorks = filteredWorks;
+        },
+        clearFilteredWorks(state) {
+            state.filteredWorks = [];
         }
     }
 });
 
-export const { addWorks, deleteWork, updateWork, getFilteredWorks, addSingleWork } = workSlice.actions;
+export const { addWorks, deleteWork, updateWork, getFilteredWorks, addSingleWork, clearFilteredWorks } = workSlice.actions;
 export default workSlice.reducer;

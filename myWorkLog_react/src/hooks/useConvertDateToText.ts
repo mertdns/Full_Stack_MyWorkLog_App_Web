@@ -16,9 +16,7 @@ export const useConvertDateToText = (text: string) => {
             if (parsedDayOfWeek < 0 || parsedDayOfWeek > 6)
                 return `${dayOfMonth} ${textOfMonth[0].toUpperCase() + textOfMonth.slice(1)} ${year}`;
 
-            const result = `${dayOfMonth} ${textOfMonth[0].toUpperCase() + textOfMonth.slice(1)} ${year} ${days[parsedDayOfWeek]}`;
-
-            return result;
+            return `${dayOfMonth} ${textOfMonth[0].toUpperCase() + textOfMonth.slice(1)} ${year} ${days[parsedDayOfWeek]}`;
         }
     }
 }

@@ -3,7 +3,7 @@ import { FaArrowAltCircleLeft, FaArrowAltCircleRight, FaBullseye } from "react-i
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store/store";
 import type { WorkType } from "../types/Work";
-import { addSingleWork, deleteWork } from "../store/workSlice";
+import { addSingleWork, clearFilteredWorks, deleteWork, getFilteredWorks } from "../store/workSlice";
 import { IoMdClose } from "react-icons/io";
 import { useConvertDateToText } from "../hooks/useConvertDateToText";
 
@@ -20,13 +20,14 @@ export default function WorkList() {
     const [activeMonth, setActiveMonth] = useState<string>((date.getMonth() + 1).toString());
     const [activeYear, setActiveYear] = useState<number>(date.getFullYear());
     const [fullDate, setFullDate] = useState<string>(
-        `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}-${date.getDay()}`
+        `${date.getDate()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getFullYear()}-${date.getDay()}`
     );
-    const [textfullDate, setTextFullDate] = useState<string>(useConvertDateToText(fullDate).convert());
+    const [textfullDate] = useState<string>(useConvertDateToText(fullDate).convert());
     const [addWorkInput, setAddWorkInput] = useState<null | string>(null);
     const [activeWorkId, setActiveWorkId] = useState<number>(-1);
 
     const works = useSelector((state: RootState) => state.work.works);
+    const filteredWorks = useSelector((state: RootState) => state.work.filteredWorks);
     const dispatch: AppDispatch = useDispatch();
 
     const increment = () => {
@@ -40,6 +41,7 @@ export default function WorkList() {
     const decrement = () => {
         if (activeYear > 1950)
             setActiveYear(prev => prev - 1)
+        setFullDate(`${date.getDate()}-${activeMonth}-${activeYear}`);
     }
 
     const changeValuesWithOrder = (deleteWorkValue: boolean, addWorkValue: boolean) => {
@@ -83,6 +85,19 @@ export default function WorkList() {
         };
     }, [deleteWorkModalState]);
 
+    useEffect(() => {
+        if (parseInt(activeMonth) === 0) {
+            dispatch(clearFilteredWorks());
+            return;
+        }
+        setFullDate(`${date.getDate()}-${activeMonth}-${activeYear}-${date.getDay()}`);
+    }, [activeMonth, activeYear])
+
+    useEffect(() => {
+        if (parseInt(activeMonth) !== 0)
+            dispatch(getFilteredWorks(fullDate));
+    }, [fullDate])
+
     const tableColumns = [
         {
             id: 1,
@@ -102,14 +117,11 @@ export default function WorkList() {
         }
     ]
 
-    // useEffect(() => {
-    // }, [activeMonth, activeYear])
-
     if (addNewWorkModalState) {
         const addWorkBtnClick = () => {
             const obj: WorkType = {
                 id: Math.floor(Math.random() * 99999999),
-                date: fullDate
+                date: `${date.getDate()}-${date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getFullYear()}-${date.getDay()}`
             }
 
             if (addWorkInput)
@@ -188,10 +200,11 @@ export default function WorkList() {
 
             <div className="flex items-center justify-center flex-col sm:flex-row gap-y-4 sm:gap-y-0 gap-x-10 my-10">
                 <div>
-                    <select value={activeMonth} onChange={(e) => setActiveMonth(e.target.value)} className="border-1 focus:outline-0 border-black" name="month" id="month">
+                    <select value={parseInt(activeMonth) < 10 ? `0${activeMonth}` : activeMonth} onChange={(e) => setActiveMonth(e.target.value)} className="border-1 focus:outline-0 border-black" name="month" id="month">
+                        <option className="bg-gray-400" value="0">Tümü</option>
                         {
                             months.map((month, index) => (
-                                <option key={index} className="bg-gray-400" value={index}>{month[0].toUpperCase() + month.slice(1)}</option>
+                                <option key={index + 1} className="bg-gray-400" value={index + 1 < 10 ? `0${index + 1}` : index + 1}>{month[0].toUpperCase() + month.slice(1)}</option>
                             ))
                         }
                     </select>
@@ -200,7 +213,7 @@ export default function WorkList() {
                     <button className="cursor-pointer" onClick={decrement}>
                         <FaArrowAltCircleLeft />
                     </button>
-                    <div>{activeYear}</div>
+                    <div>{parseInt(activeMonth) != 0 ? activeYear : 'Tümü'}</div>
                     <button className="cursor-pointer" onClick={increment}>
                         <FaArrowAltCircleRight />
                     </button>
@@ -228,7 +241,7 @@ export default function WorkList() {
                     </thead>
                     <tbody>
                         {
-                            works && works.map((work: WorkType) => {
+                            activeMonth && parseInt(activeMonth) == 0 ? works && works.map((work: WorkType) => {
                                 const data = useConvertDateToText(work.date);
                                 return (
                                     <tr key={work.id}>
@@ -246,7 +259,26 @@ export default function WorkList() {
                                         </td>
                                     </tr>
                                 )
-                            })
+                            }) :
+                                filteredWorks && filteredWorks.map((work: WorkType) => {
+                                    const data = useConvertDateToText(work.date);
+                                    return (
+                                        <tr key={work.id}>
+                                            <td className={tableContentColumnsStyle}>{work.id}</td>
+                                            <td className={tableContentColumnsStyle}>{data.convert()}</td>
+                                            <td className={tableContentColumnsStyle}>{work.explanation}</td>
+                                            <td className={tableContentColumnsStyle + " text-center"}>
+                                                <button
+                                                    className="focus:outline-0 border-0 bg-red-700 text-white my-2 px-3 rounded-xl duration-200 hover:bg-transparent hover:text-red-700 hover:border-1 hover:border-red-700"
+                                                    onClick={() => {
+                                                        setActiveWorkId(work.id);
+                                                        changeValuesWithOrder(true, false)
+                                                    }}
+                                                    type="button">Sil</button>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                         }
                     </tbody>
                 </table>

@@ -5,6 +5,6 @@ export interface WorkType{
 }
 
 export interface WorkSliceType{
-    works: Array<WorkType> | null;
+    works: Array<WorkType>;
     filteredWorks: Array<WorkType> | null;
 }
