@@ -10,7 +10,7 @@ export const worksData: WorkType[] = [
         id: Math.floor(99999999 * Math.random()),
         date: "12-11-2026-2",
         explanation: "merhaba"
-    },    {
+    }, {
         id: Math.floor(99999999 * Math.random()),
         date: "11-11-2026-2",
         explanation: "kasım"
@@ -23,5 +23,10 @@ export const worksData: WorkType[] = [
         id: Math.floor(99999999 * Math.random()),
         date: "26-06-2022-4",
         explanation: "yeni içerik"
+    },
+    {
+        id: Math.floor(99999999 * Math.random()),
+        date: "26-10-2026-4",
+        explanation: "ekime özel"
     },
 ]

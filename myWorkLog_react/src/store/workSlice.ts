@@ -18,10 +18,16 @@ const workSlice = createSlice({
             state.works?.push(action.payload);
         },
         deleteWork(state, action: PayloadAction<number>) {
-            const index = state.works?.findIndex(x => x.id === action.payload);
-            if (index !== -1 && index != null) {
-                state.works?.splice(index, 1);
+            const worksIndex = state.works?.findIndex(x => x.id === action.payload);
+            if (worksIndex !== -1 && worksIndex != null) {
+                state.works?.splice(worksIndex, 1);
             }
+
+            const filteredWorksIndex = state.filteredWorks?.findIndex(x => x.id === action.payload);
+            if(filteredWorksIndex !== -1 && filteredWorksIndex != null){
+                state.filteredWorks?.splice(filteredWorksIndex, 1);
+            }
+
         },
         updateWork(state: WorkSliceType, action: PayloadAction<WorkType>) {
             const index = state.works?.findIndex(x => x.id === action.payload.id);
