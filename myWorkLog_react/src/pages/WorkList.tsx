@@ -11,12 +11,13 @@ export const months = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "
 
 export default function WorkList() {
     const date = new Date();
+    const tableContentColumnsStyle: string = "border-1 border-black px-2";
     const addWorkModalRef = useRef<HTMLDivElement>(null);
     const deleteWorkModalRef = useRef<HTMLDivElement>(null);
     const [addNewWorkModalState, setAddNewWorkModalState] = useState<boolean>(false);
     const [deleteWorkModalState, setDeleteWorkModalState] = useState<boolean>(false);
     const addWorkInputRef = useRef<HTMLInputElement>(null);
-    const tableContentColumnsStyle: string = "border-1 border-black px-2";
+    const showActiveYear = useRef<HTMLDivElement>(null);
     const [activeMonth, setActiveMonth] = useState<string>((date.getMonth() + 1).toString());
     const [activeYear, setActiveYear] = useState<number>(date.getFullYear());
     const [fullDate, setFullDate] = useState<string>(
@@ -30,17 +31,26 @@ export default function WorkList() {
     const filteredWorks = useSelector((state: RootState) => state.work.filteredWorks);
     const dispatch: AppDispatch = useDispatch();
 
+    const setActiveYearDivWitUpdatedYear = (year: number) => {
+        if (showActiveYear.current) {
+            showActiveYear.current.innerHTML = String(year);
+        }
+    }
+
     const increment = () => {
         let currentDay = new Date().getFullYear();
         if (activeYear < currentDay) {
             setActiveYear(prev => prev + 1)
         }
+        setActiveYearDivWitUpdatedYear(activeYear);
         setFullDate(`${date.getDate()}-${activeMonth}-${activeYear}`);
     }
 
     const decrement = () => {
-        if (activeYear > 1950)
+        if (activeYear > 1950) {
             setActiveYear(prev => prev - 1)
+        }
+        setActiveYearDivWitUpdatedYear(activeYear);
         setFullDate(`${date.getDate()}-${activeMonth}-${activeYear}`);
     }
 
@@ -213,7 +223,7 @@ export default function WorkList() {
                     <button className="cursor-pointer" onClick={decrement}>
                         <FaArrowAltCircleLeft />
                     </button>
-                    <div>{parseInt(activeMonth) != 0 ? activeYear : 'Tümü'}</div>
+                    <div ref={showActiveYear}>{parseInt(activeMonth) != 0 ? activeYear : 'Tümü'}</div>
                     <button className="cursor-pointer" onClick={increment}>
                         <FaArrowAltCircleRight />
                     </button>
