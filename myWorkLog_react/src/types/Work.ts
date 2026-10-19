@@ -1,5 +1,5 @@
 export interface WorkType{
-    id:number;
+    _id:string;
     date:string;
     explanation?:string;
 }
@@ -7,4 +7,9 @@ export interface WorkType{
 export interface WorkSliceType{
     works: Array<WorkType>;
     filteredWorks: Array<WorkType> | null;
+}
+
+export interface AddWork{
+    date:string;
+    explanation?:string;
 }

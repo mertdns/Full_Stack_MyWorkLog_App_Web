@@ -1,59 +1,106 @@
 # My Work Log
 
-My Work Log, çalışma günlerini ve günlük iş kayıtlarını takip etmeyi amaçlayan bir projedir. Proje şu anda React tabanlı bir kullanıcı arayüzü içeriyor; ilerleyen aşamada bu arayüze bağlanacak ayrı bir API/backend projesi eklenmesi planlanıyor.
+My Work Log, günlük çalışma kayıtlarını takip etmek için geliştirilmiş tam yığın bir uygulamadır. React tabanlı web arayüzü, NestJS API üzerinden MongoDB'de saklanan kayıtları listeler, yeni kayıt oluşturur ve kayıt siler.
 
 ## Proje bileşenleri
 
-| Bileşen | Dizin | Durum |
+| Bileşen | Dizin | Teknolojiler |
 | --- | --- | --- |
-| Web arayüzü | [`myWorkLog_react/`](./myWorkLog_react/) | Geliştirme aşamasında |
-| API / backend | Planlanıyor | Henüz projeye eklenmedi |
+| Web arayüzü | [`myWorkLog_react/`](./myWorkLog_react/) | React, TypeScript, Vite, Redux Toolkit, Tailwind CSS |
+| API / backend | [`my-work-log_nest/`](./my-work-log_nest/) | NestJS, TypeScript, Mongoose |
+| Veritabanı | MongoDB | Çalışma kayıtlarının kalıcı saklanması |
 
-Arayüzün ayrıntılı açıklaması ve teknik kurulum notları için [`myWorkLog_react/README.md`](./myWorkLog_react/README.md) dosyasına bakabilirsiniz.
+## Özellikler
 
-## Mevcut arayüz
+- Çalışma kayıtlarını listeleme ve aya/yıla göre filtreleme
+- Bugünün tarihiyle açıklamalı veya açıklamasız kayıt oluşturma
+- Onay penceresiyle kayıt silme
+- Verileri MongoDB'de saklama
+- Responsive web arayüzü
 
-Arayüz, çalışma günlüğü ekranı için React ve TypeScript ile geliştirilmiştir. Ekranda ay ve yıl seçimi, çalışma kayıtları tablosu ve yeni kayıt/silme kontrolleri bulunur. Kayıt yönetimi şu an tamamlanmış, kalıcı veriye bağlı bir özellik değildir; gerçek kayıt işlemleri sonraki geliştirme aşamalarında eklenecektir.
+## Gereksinimler
 
-### Kullanılan teknolojiler
+- Node.js ve npm
+- Çalışan bir MongoDB sunucusu veya MongoDB Atlas bağlantısı
 
-- React 19 ve TypeScript
-- Vite
-- Tailwind CSS
-- Redux Toolkit
-- React Router
-- Oxlint
+## Kurulum ve çalıştırma
 
-## Geliştirme ortamını çalıştırma
+### 1. API / backend
 
-Önce arayüz dizinine geçip bağımlılıkları yükleyin:
+Bir terminalde backend dizinine geçip bağımlılıkları yükleyin:
+
+```bash
+cd my-work-log_nest
+npm install
+```
+
+`my-work-log_nest/.env` dosyasını oluşturup MongoDB bağlantı adresini tanımlayın:
+
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017/my-work-log
+```
+
+MongoDB Atlas kullanıyorsanız `MONGODB_URI` değerini Atlas bağlantı adresinizle değiştirin. Ardından API'yi geliştirme modunda başlatın:
+
+```bash
+npm run start:dev
+```
+
+API varsayılan olarak `http://localhost:3000` adresinde çalışır. Farklı bir `PORT` tanımlarsanız frontend'in API adresini de buna göre ayarlayın.
+
+### 2. Web arayüzü
+
+İkinci bir terminalde frontend dizinine geçip bağımlılıkları yükleyin:
 
 ```bash
 cd myWorkLog_react
 npm install
-```
-
-Geliştirme sunucusunu başlatın:
-
-```bash
 npm run dev
 ```
 
-## Komutlar
+Vite'ın terminalde gösterdiği yerel adresi tarayıcıda açın. Arayüz, API adresi belirtilmediğinde `http://localhost:3000` adresini kullanır. API farklı bir adreste çalışıyorsa `myWorkLog_react/.env` dosyasına aşağıdaki değişkeni ekleyin:
 
-Komutları `myWorkLog_react/` dizininde çalıştırın:
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+## API uç noktaları
+
+| Metot | Uç nokta | Açıklama |
+| --- | --- | --- |
+| `GET` | `/work` | Tüm çalışma kayıtlarını getirir |
+| `POST` | `/work` | Yeni çalışma kaydı oluşturur |
+| `DELETE` | `/work/:id` | Belirtilen kaydı siler |
+
+Yeni kayıt isteği `date` alanını zorunlu, `explanation` alanını isteğe bağlı olarak alır:
+
+```json
+{
+  "date": "19-10-2026-1",
+  "explanation": "Proje üzerinde çalışma"
+}
+```
+
+## Kullanılabilir komutlar
+
+Komutları ilgili uygulama dizininde çalıştırın.
+
+### Frontend (`myWorkLog_react/`)
 
 | Komut | Açıklama |
 | --- | --- |
 | `npm run dev` | Vite geliştirme sunucusunu başlatır |
-| `npm run build` | TypeScript kontrolünü çalıştırır ve üretim derlemesi oluşturur |
+| `npm run build` | TypeScript kontrolü ve üretim derlemesi yapar |
 | `npm run preview` | Üretim derlemesini yerel olarak önizler |
 | `npm run lint` | Oxlint ile kod kontrolü yapar |
 
-## Yol haritası
+### Backend (`my-work-log_nest/`)
 
-- Çalışma kayıtları için oluşturma, düzenleme ve silme akışlarını tamamlamak
-- Ayrı bir API/backend projesi eklemek
-- Arayüzü API'ye bağlayarak kayıtların kalıcı olarak saklanmasını sağlamak
-
-Backend'in teknolojisi ve API sözleşmesi henüz belirlenmedi; ilgili proje eklendiğinde kurulum ve kullanım adımları bu README'de güncellenecektir.
+| Komut | Açıklama |
+| --- | --- |
+| `npm run start:dev` | NestJS API'yi izleme modunda başlatır |
+| `npm run build` | Backend'i derler |
+| `npm run start:prod` | Derlenmiş backend'i başlatır |
+| `npm run lint` | ESLint ile kod kontrolü yapar |
+| `npm run test` | Birim testlerini çalıştırır |
+| `npm run test:e2e` | Uçtan uca testleri çalıştırır |

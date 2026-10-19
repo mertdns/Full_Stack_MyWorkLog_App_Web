@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store/store";
-import type { WorkType } from "../types/Work";
+import type { AddWork, WorkType } from "../types/Work";
 import {
-    addSingleWork,
+    addWork,
     clearFilteredWorks,
     deleteWork,
+    getAllWorks,
     getFilteredWorks
 } from "../store/workSlice";
 import { IoMdClose } from "react-icons/io";
@@ -26,19 +27,19 @@ function WorkRow({
 }: {
     work: WorkType;
     tableContentColumnsStyle: string;
-    onDelete: (id: number) => void;
+    onDelete: (id: string) => void;
 }) {
     const data = useConvertDateToText(work.date);
 
     return (
         <tr>
-            <td className={tableContentColumnsStyle}>{work.id}</td>
+            <td className={tableContentColumnsStyle}>{work['_id']}</td>
             <td className={tableContentColumnsStyle}>{data.convert()}</td>
             <td className={tableContentColumnsStyle}>{work.explanation}</td>
             <td className={`${tableContentColumnsStyle} text-center`}>
                 <button
                     className="focus:outline-0 border-0 bg-red-700 text-white my-2 px-3 rounded-xl duration-200 hover:bg-transparent hover:text-red-700 hover:border-1 hover:border-red-700"
-                    onClick={() => onDelete(work.id)}
+                    onClick={() => onDelete(work['_id'])}
                     type="button"
                 >
                     Sil
@@ -80,7 +81,7 @@ export default function WorkList() {
     );
 
     const [addWorkInput, setAddWorkInput] = useState<null | string>(null);
-    const [activeWorkId, setActiveWorkId] = useState<number>(-1);
+    const [activeWorkId, setActiveWorkId] = useState<string>('');
 
     const works = useSelector((state: RootState) => state.work.works);
     const filteredWorks = useSelector(
@@ -120,6 +121,10 @@ export default function WorkList() {
             setDeleteWorkModalState(false);
         }
     };
+
+    useEffect(() => {
+        dispatch(getAllWorks());
+    }, [dispatch]);
 
     useEffect(() => {
         if (addNewWorkModalState) {
@@ -173,7 +178,7 @@ export default function WorkList() {
         if (Number(activeMonth) !== 0) {
             dispatch(getFilteredWorks(fullDate));
         }
-    }, [fullDate, activeMonth, dispatch]);
+    }, [fullDate, activeMonth, dispatch, works]);
 
     const tableColumns = [
         { id: 1, title: "ID" },
@@ -183,8 +188,7 @@ export default function WorkList() {
     ];
 
     const handleAddWork = () => {
-        const obj: WorkType = {
-            id: Math.floor(Math.random() * 99999999),
+        const obj: AddWork = {
             date: `${date.getDate()}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}-${date.getDay()}`
         };
 
@@ -192,12 +196,13 @@ export default function WorkList() {
             obj.explanation = addWorkInput;
         }
 
-        dispatch(addSingleWork(obj));
+        dispatch(addWork(obj));
+        dispatch(getFilteredWorks(fullDate));
         changeValuesWithOrder(false, false);
         setAddWorkInput("");
     };
 
-    const handleDeleteWork = (id: number) => {
+    const handleDeleteWork = (id: string) => {
         setActiveWorkId(id);
         changeValuesWithOrder(true, false);
     };
@@ -386,7 +391,7 @@ export default function WorkList() {
                         {Number(activeMonth) === 0
                             ? works?.map((work: WorkType) => (
                                 <WorkRow
-                                    key={work.id}
+                                    key={work['_id']}
                                     work={work}
                                     tableContentColumnsStyle={tableContentColumnsStyle}
                                     onDelete={handleDeleteWork}
@@ -394,7 +399,7 @@ export default function WorkList() {
                             ))
                             : filteredWorks?.map((work: WorkType) => (
                                 <WorkRow
-                                    key={work.id}
+                                    key={work['_id']}
                                     work={work}
                                     tableContentColumnsStyle={tableContentColumnsStyle}
                                     onDelete={handleDeleteWork}

@@ -1,40 +1,39 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { WorkSliceType, WorkType } from "../types/Work";
-import { worksData } from "../sample-data/data";
+import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { AddWork, WorkSliceType, WorkType } from "../types/Work";
+import { api } from "../axios/axios";
 
 const initialState: WorkSliceType = {
-    works: worksData,
+    works: [],
     filteredWorks: []
 }
+export const getAllWorks = createAsyncThunk(
+    "work/getAllWorks",
+    async () => {
+        const response = await api.get<WorkType[]>("/work");
+        return response.data;
+    }
+);
+
+export const addWork = createAsyncThunk(
+    "work/addWork",
+    async (work: AddWork) => {
+        const response = await api.post<WorkType>("/work", work);
+        return response.data;
+    }
+);
+
+export const deleteWork = createAsyncThunk(
+    "work/deleteWork",
+    async (id: string) => {
+        await api.delete("/work/" + id);
+        return id;
+    }
+);
 
 const workSlice = createSlice({
     name: "work",
     initialState,
     reducers: {
-        addWorks(state: WorkSliceType, action: PayloadAction<WorkType[]>) {
-            state.works = action.payload;
-        },
-        addSingleWork(state: WorkSliceType, action: PayloadAction<WorkType>) {
-            state.works?.push(action.payload);
-        },
-        deleteWork(state, action: PayloadAction<number>) {
-            const worksIndex = state.works?.findIndex(x => x.id === action.payload);
-            if (worksIndex !== -1 && worksIndex != null) {
-                state.works?.splice(worksIndex, 1);
-            }
-
-            const filteredWorksIndex = state.filteredWorks?.findIndex(x => x.id === action.payload);
-            if(filteredWorksIndex !== -1 && filteredWorksIndex != null){
-                state.filteredWorks?.splice(filteredWorksIndex, 1);
-            }
-
-        },
-        updateWork(state: WorkSliceType, action: PayloadAction<WorkType>) {
-            const index = state.works?.findIndex(x => x.id === action.payload.id);
-            if (index != -1 && index != null) {
-                state.works?.splice(index, 1, action.payload);
-            }
-        },
         getFilteredWorks(state, action: PayloadAction<string>) {
             const parts = action.payload.split("-");
 
@@ -52,8 +51,22 @@ const workSlice = createSlice({
         clearFilteredWorks(state) {
             state.filteredWorks = [];
         }
+    },
+    extraReducers: builder => {
+        builder.addCase(getAllWorks.fulfilled, (state, action) => {
+            state.works = action.payload;
+            state.filteredWorks = [];
+        });
+        builder.addCase(addWork.fulfilled, (state, action) => {
+            state.works.push(action.payload);
+            state.filteredWorks = [];
+        });
+        builder.addCase(deleteWork.fulfilled, (state, action) => {
+            state.works = state.works.filter(x => x['_id'] !== action.payload);
+            state.filteredWorks = [];
+        });
     }
 });
 
-export const { addWorks, deleteWork, updateWork, getFilteredWorks, addSingleWork, clearFilteredWorks } = workSlice.actions;
+export const { getFilteredWorks, clearFilteredWorks } = workSlice.actions;
 export default workSlice.reducer;
