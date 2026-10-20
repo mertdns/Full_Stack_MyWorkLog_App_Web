@@ -33,7 +33,6 @@ function WorkRow({
 
     return (
         <tr>
-            <td className={tableContentColumnsStyle}>{work['_id']}</td>
             <td className={tableContentColumnsStyle}>{data.convert()}</td>
             <td className={tableContentColumnsStyle}>{work.explanation}</td>
             <td className={`${tableContentColumnsStyle} text-center`}>
@@ -181,7 +180,6 @@ export default function WorkList() {
     }, [fullDate, activeMonth, dispatch, works]);
 
     const tableColumns = [
-        { id: 1, title: "ID" },
         { id: 2, title: "Tarih" },
         { id: 3, title: "Açıklama" },
         { id: 4, title: "İşlemler" }
