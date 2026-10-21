@@ -82,7 +82,7 @@ export default function WorkList() {
     const [addWorkInput, setAddWorkInput] = useState<null | string>(null);
     const [secretKey, setSecretKey] = useState<string>(localStorage.getItem("secretKey") ?? "");
     const [activeWorkId, setActiveWorkId] = useState<string>('');
-    const [paginatedList, setPaginatedList] = useState<Array<WorkType> | null>([]);
+    // const [paginatedList, setPaginatedList] = useState<Array<WorkType> | null>([]);
 
     const works = useSelector((state: RootState) => state.work.works);
     const filteredWorks = useSelector(
