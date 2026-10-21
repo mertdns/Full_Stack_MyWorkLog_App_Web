@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight, FaMinus, FaPlus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store/store";
 import type { AddWork, WorkType } from "../types/Work";
@@ -82,6 +82,7 @@ export default function WorkList() {
     const [addWorkInput, setAddWorkInput] = useState<null | string>(null);
     const [secretKey, setSecretKey] = useState<string>(localStorage.getItem("secretKey") ?? "");
     const [activeWorkId, setActiveWorkId] = useState<string>('');
+    const [paginatedList, setPaginatedList] = useState<Array<WorkType> | null>([]);
 
     const works = useSelector((state: RootState) => state.work.works);
     const filteredWorks = useSelector(
@@ -462,6 +463,12 @@ export default function WorkList() {
                             ))}
                     </tbody>
                 </table>
+
+                <div className="mt-4 flex items-center justify-center gap-x-5 flex-wrap">
+                    <button className="bg-blue-400 text-black font-bold text-xs px-3 py-2 rounded-xl cursor-pointer" type="button"> <FaMinus /> </button>
+                    <span className="text-xl cursor-default select-none">1/10</span>
+                    <button className="bg-blue-400 text-black font-bold text-xs px-3 py-2 rounded-xl cursor-pointer" type="button"> <FaPlus /> </button>
+                </div>
             </div>
         </div>
     );
