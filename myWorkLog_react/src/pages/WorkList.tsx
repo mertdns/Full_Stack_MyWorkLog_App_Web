@@ -206,11 +206,24 @@ export default function WorkList() {
     };
 
     if (addNewWorkModalState) {
+
+        const keyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+            if (e.key == "Enter") {
+                handleAddWork();
+            }
+
+            if (e.key == "Escape") {
+                changeValuesWithOrder(false, false);
+                setAddWorkInput("");
+            }
+        }
+
         return (
             <div
                 ref={addWorkModalRef}
                 id="addWorkModal"
                 className="bg-[rgba(0,0,0,.4)] absolute left-0 top-0 bottom-0 right-0 duration-400 flex items-center justify-center"
+                onKeyDown={keyDown}
             >
                 <div className="bg-blue-300 max-w-70 w-full rounded-xl p-2 mx-2">
                     <div className="text-right">
