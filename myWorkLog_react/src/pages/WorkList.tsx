@@ -80,6 +80,7 @@ export default function WorkList() {
     );
 
     const [addWorkInput, setAddWorkInput] = useState<null | string>(null);
+    const [secretKey, setSecretKey] = useState<string>(localStorage.getItem("secretKey") ?? "");
     const [activeWorkId, setActiveWorkId] = useState<string>('');
 
     const works = useSelector((state: RootState) => state.work.works);
@@ -185,9 +186,33 @@ export default function WorkList() {
         { id: 4, title: "İşlemler" }
     ];
 
+    const checkSecretKey = (): boolean => {
+        if (secretKey) {
+            if (secretKey !== import.meta.env.VITE_SECRET_KEY) {
+                alert("lütfen doğru anahtarı girin")
+                setAddWorkInput("");
+                setSecretKey("");
+                return false;
+            }
+            else {
+                localStorage.setItem("secretKey", secretKey);
+                return true;
+            }
+        }
+        else {
+            alert("lütfen gizli anahtar alanını doldurun")
+            return false;
+        }
+    }
+
     const handleAddWork = () => {
+
+        if (!checkSecretKey()) {
+            return;
+        }
+
         const obj: AddWork = {
-            date: `${date.getDate()}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}-${date.getDay()}`
+            date: `${date.getDate()}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getFullYear()}-${date.getDay()}`,
         };
 
         if (addWorkInput) {
@@ -198,6 +223,7 @@ export default function WorkList() {
         dispatch(getFilteredWorks(fullDate));
         changeValuesWithOrder(false, false);
         setAddWorkInput("");
+        setSecretKey("");
     };
 
     const handleDeleteWork = (id: string) => {
@@ -238,7 +264,7 @@ export default function WorkList() {
                         <hr />
 
                         <div className="flex items-center justify-center flex-col gap-y-3 sm:flex-row gap-x-10 my-4">
-                            <label htmlFor="explanation">Açıklama</label>
+                            <label htmlFor="explanation" className="text-xs">Açıklama</label>
 
                             <input
                                 className="outline-0 border-b-1 border-b-yellow-600 placeholder:px-2 placeholder:text-xs text-xs px-2"
@@ -249,6 +275,20 @@ export default function WorkList() {
                                 onChange={e => setAddWorkInput(e.target.value)}
                                 ref={addWorkInputRef}
                                 placeholder="Opsiyonel Açıklama Gir..."
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-center flex-col gap-y-3 sm:flex-row gap-x-10 my-4">
+                            <label htmlFor="secretKey" className="text-xs">Gizli Anahtar</label>
+
+                            <input
+                                className="outline-0 border-b-1 border-b-yellow-600 placeholder:px-2 placeholder:text-xs text-xs px-2"
+                                type="text"
+                                name="secretKey"
+                                id="secretKey"
+                                value={secretKey ?? localStorage.getItem("secretKey")}
+                                onChange={e => setSecretKey(e.target.value)}
+                                placeholder="Gizli Anahtarı Gir..."
                             />
                         </div>
 
@@ -302,7 +342,11 @@ export default function WorkList() {
                                 className="bg-red-700 text-white font-bold text-xs px-4 p-1 cursor-pointer duration-200 hover:bg-transparent hover:text-red-700 hover:border-1 hover:border-red-700"
                                 type="button"
                                 onClick={() => {
-                                    dispatch(deleteWork(activeWorkId));
+                                    if (checkSecretKey()) {
+                                        dispatch(deleteWork(activeWorkId));
+                                    } else {
+                                        alert("gizli anahtar yanlış, işlem yapılamaz")
+                                    }
                                     changeValuesWithOrder(false, false);
                                 }}
                             >
